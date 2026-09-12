@@ -1,6 +1,6 @@
 {
   "name": "dsh-workspace-tools",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "One plugin for the DSH sidebar's workspace layer: per-workspace cover images, one-click collapse of all workspaces, and session grouping inside a workspace. Each of the three has an on/off switch in Settings → 工作区 that takes effect immediately.",
   "type": "module",
