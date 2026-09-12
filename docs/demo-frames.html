@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>demo frames</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0b0d11}
+body{width:360px;height:520px;padding:14px;font-family:"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.sb{width:300px;background:#151517;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:11px;
+  box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.sbtop{display:flex;align-items:center;gap:8px;padding:2px 3px 9px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:9px}
+.dot{width:15px;height:15px;border-radius:5px;background:linear-gradient(135deg,#7db0ff,#a06de0)}
+
+/* 可点的「WORKSPACES」标题（对应插件把 sectionLabel 按钮化后的样子） */
+.sbhead{position:relative;display:inline-flex;align-items:center;gap:5px;
+  margin:-2px 0 8px -7px;padding:2px 7px;border-radius:6px;
+  font-size:12px;font-weight:600;letter-spacing:.06em;color:#8fa8d8;cursor:pointer}
+.sbhead::after{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid currentColor;opacity:.75}
+.sbhead.up::after{border-top-color:transparent;border-bottom:5px solid currentColor}
+.sbhead.hover{background:rgba(127,127,127,.16);color:#e8ecf3}
+
+.wsrow{position:relative;isolation:isolate;display:flex;align-items:center;gap:7px;padding:0 8px;height:34px;
+  border-radius:8px;margin-bottom:4px;overflow:hidden;
+  background-image:var(--img);background-size:cover;background-position:center}
+.wsrow::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+  background:linear-gradient(90deg,rgba(15,16,20,.90) 0%,rgba(15,16,20,.62) 45%,rgba(15,16,20,.18) 100%)}
+.wsrow>*{position:relative;z-index:1}
+.wsrow .ico{width:16px;height:16px;flex:none;color:#fff;opacity:.92}
+.wsrow .nm{color:#fff;font-size:13px;font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.55);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsrow.plain{background-image:none}
+.wsrow.plain::before{display:none}
+.wsrow.plain .ico{color:#9aa6b8;opacity:1}
+.wsrow.plain .nm{color:#c2c8d4;text-shadow:none}
+
+.sess{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:6px;font-size:12.5px;color:#c2c8d4;
+  overflow:hidden;white-space:nowrap}
+.sess .tm{margin-left:auto;font-size:10.5px;color:#6f7683;flex:none}
+.sess.on{background:rgba(77,123,254,.15);color:#f2f4f8;font-weight:600;position:relative}
+.sess.on::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;border-radius:2px;background:#4D7BFE}
+
+/* 点击指示光标 */
+.cursor{position:absolute;width:20px;height:20px;z-index:9;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.ringwrap{position:relative;display:inline-block}
+.ring{position:absolute;inset:-4px;border-radius:9px;border:2px solid rgba(120,170,255,.85);
+  box-shadow:0 0 0 4px rgba(77,123,254,.18);pointer-events:none}
+</style>
+</head>
+<body>
+<div class="sb">
+  <div class="sbtop"><span class="dot"></span>
+    <span style="font-size:11px;letter-spacing:.16em;color:#6f7683;font-weight:600">WORKSPACES</span>
+  </div>
+
+  <span class="ringwrap">
+    <span class="sbhead" id="head">WORKSPACES</span>
+    <span class="ring" id="ring" style="display:none"></span>
+  </span>
+
+  <div id="list"></div>
+</div>
+
+<svg class="cursor" id="cursor" viewBox="0 0 24 24" style="display:none">
+  <path d="M5 2.5 19.2 12.6l-6.05.62 3.2 6.9-2.6 1.2-3.2-6.92L5 18.6Z"
+        fill="#ffffff" stroke="#1b1d22" stroke-width="1.2" stroke-linejoin="round"/>
+</svg>
+
+<script>
+const ICON = '<svg class="ico" viewBox="0 0 16 16"><path d="M1.75 4.25c0-.69.56-1.25 1.25-1.25h3.02c.38 0 .74.17.98.47l.54.68h4.48c.69 0 1.25.56 1.25 1.25v5.35c0 .69-.56 1.25-1.25 1.25H2.99c-.69 0-1.25-.56-1.25-1.25V4.25Z" fill="currentColor"/></svg>';
+const WSC = (name, img) => '<div class="wsrow" style="--img:url(\'assets/presets/' + img + '.png\')">'
+  + '<svg class="ico" viewBox="0 0 16 16"><path d="M1.75 4.25c0-.69.56-1.25 1.25-1.25h3.02c.38 0 .74.17.98.47l.54.68h4.48c.69 0 1.25.56 1.25 1.25v5.35c0 .69-.56 1.25-1.25 1.25H2.99c-.69 0-1.25-.56-1.25-1.25V4.25Z" fill="#fff"/></svg>'
+  + '<span class="nm">' + name + '</span></div>';
+const WSP = (name) => '<div class="wsrow plain">' + ICON + '<span class="nm">' + name + '</span></div>';
+const SESS = (t, tm, on) => '<div class="sess' + (on ? ' on' : '') + '">' + t + '<span class="tm">' + tm + '</span></div>';
+
+// 封面是「工作区行」的属性，与展开/折叠无关：折叠后工作区名的背景必须照旧保留
+const WS_ROWS = WSC('acme-web', 'tech') + WSP('paper-radar') + WSC('infra-lab', 'engineering') + WSP('health-notes');
+const EXPANDED = WSC('acme-web', 'tech')
+  + SESS('Landing page layout', '12:04', true)
+  + SESS('Auth flow copy polish', '11:20', false)
+  + SESS('Pricing page motion', 'yesterday', false)
+  + SESS('Telemetry plan', 'Mon', false)
+  + WSP('paper-radar') + WSC('infra-lab', 'engineering') + WSP('health-notes');
+
+const COLLAPSED = WS_ROWS;
+
+/* f: 0=展开  1=悬停标题  2=折叠  3=悬停标题(折叠态)  4=恢复展开 */
+const f = parseInt(new URLSearchParams(location.search).get('f') || '0', 10);
+const head = document.getElementById('head');
+
+if (f === 2 || f === 3) {
+  head.classList.add('up');
+  document.getElementById('list').innerHTML = COLLAPSED;
+} else {
+  document.getElementById('list').innerHTML = EXPANDED;
+}
+if (f === 1 || f === 3) {
+  head.classList.add('hover');
+  document.getElementById('ring').style.display = 'block';
+  const r = head.getBoundingClientRect();
+  const c = document.getElementById('cursor');
+  c.style.display = 'block';
+  c.style.left = Math.round(r.right + 2) + 'px';
+  c.style.top = Math.round(r.top + 12) + 'px';
+}
+</script>
+</body>
+</html>

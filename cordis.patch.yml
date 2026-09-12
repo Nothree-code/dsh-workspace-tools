@@ -1,0 +1,8 @@
+# dsh-workspace-tools bundle patch（原 dsh-sidebar-fold / dsh-workspace-cover /
+# dsh-sidebar-groups 三合一）。
+# Host half: stores the cover PNGs under ~/.dsh/storages/workspace-covers/ and
+# serves them over /dsh-cover-*. Browser half: covers + collapse-all + session
+# grouping, each behind a switch in Settings → 工作区.
+- insert:
+    - id: dsh-workspace-tools
+      name: 'dsh-workspace-tools'

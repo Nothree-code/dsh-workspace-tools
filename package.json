@@ -1,0 +1,50 @@
+{
+  "name": "dsh-workspace-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One plugin for the DSH sidebar's workspace layer: per-workspace cover images, one-click collapse of all workspaces, and session grouping inside a workspace. Each of the three has an on/off switch in Settings → 工作区 that takes effect immediately.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "slots"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "plugin",
+    "sidebar",
+    "workspace",
+    "cover"
+  ],
+  "files": [
+    "lib",
+    "assets",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "install.mjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nothree-code/dsh-workspace-tools.git"
+  },
+  "homepage": "https://github.com/Nothree-code/dsh-workspace-tools#readme"
+}
